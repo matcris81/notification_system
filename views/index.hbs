@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        .food-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .food-item input {
+            margin-right: 5px;
+        }
+        button {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Order Form</h1>
+    <form id="orderForm">
+        <div class="form-group">
+            <label for="orderNumber">Order Number:</label>
+            <input type="text" id="orderNumber" name="orderNumber" placeholder="Enter order number">
+        </div>
+        <div id="foodItems">
+            {{#each foodItems}}
+            <div class="food-item">
+                <input type="text" name="food[]" value="{{this}}" placeholder="Enter food item">
+                <button type="button" onclick="addFoodItem()">+</button>
+            </div>
+            {{/each}}
+            <div class="food-item">
+                <input type="text" name="food[]" placeholder="Enter food item">
+                <button type="button" onclick="addFoodItem()">+</button>
+            </div>
+        </div>
+        <button type="submit">Submit Order</button>
+    </form>
+
+    <script>
+        function addFoodItem() {
+            const foodItemsDiv = document.getElementById('foodItems');
+
+            // Create a new div for the food item
+            const newFoodDiv = document.createElement('div');
+            newFoodDiv.className = 'food-item';
+
+            // Add input field
+            const foodInput = document.createElement('input');
+            foodInput.type = 'text';
+            foodInput.name = 'food[]';
+            foodInput.placeholder = 'Enter food item';
+
+            // Add "+" button
+            const addButton = document.createElement('button');
+            addButton.type = 'button';
+            addButton.textContent = '+';
+            addButton.onclick = addFoodItem;
+
+            // Append input and button to the new div
+            newFoodDiv.appendChild(foodInput);
+            newFoodDiv.appendChild(addButton);
+
+            // Append the new div to the foodItems container
+            foodItemsDiv.appendChild(newFoodDiv);
+        }
+
+        document.getElementById('orderForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent page refresh
+
+            // Get order number
+            const orderNumber = document.getElementById('orderNumber').value;
+
+            // Get all food items
+            const foodInputs = document.querySelectorAll('input[name="food[]"]');
+            const foodItems = Array.from(foodInputs).map(input => input.value);
+
+            const url = "http://localhost:3000/order";
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({orderNumber: orderNumber, order: foodItems})
+                });
+                const qrCodeDataUri = await response.text();
+
+                // Create an image element to display the QR code
+                const qrCodeImage = document.createElement('img');
+                qrCodeImage.src = qrCodeDataUri; // Use the data URI as the image source
+                qrCodeImage.alt = 'QR Code';
+
+                // Display the QR code on the page
+                document.body.innerHTML = ''; // Clear the page
+                document.body.appendChild(qrCodeImage);
+
+                // Optionally, reload the page after a delay
+                // setTimeout(() => {
+                //     window.location.reload();
+                // }, 5000); // Reload after 5 seconds
+            } catch (error) {
+                console.error(error.message);
+            }
+        });
+    </script>
+</body>
+</html>

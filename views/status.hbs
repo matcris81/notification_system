@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notification Permission</title>
+</head>
+<body>
+  <h1>Notification Permission</h1>
+  <button id="requestPermission">Enable Notifications</button>
+  <p id="status">Notification Status: {{id}}</p>
+  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+  <script>
+      // Connect to the Socket.IO server
+      const socket = io('http://192.168.3.48:3000'); // Adjust the URL as needed
+
+      // Handle successful connection
+      socket.on('connect', () => {
+        console.log('Connected to the WebSocket server');
+        document.getElementById('status').innerText = 'Connected to the server!';
+      });
+
+      // Handle incoming messages from the server
+      socket.on('notification', (data) => {
+        console.log('Notification received:', data);
+        document.getElementById('status').innerText = `Notification: ${data.message}`;
+      });
+
+      // Handle disconnection
+      socket.on('disconnect', () => {
+        console.log('Disconnected from the WebSocket server');
+        document.getElementById('status').innerText = 'Disconnected from the server!';
+      });
+
+      // Example: Send a message to the server when a button is clicked
+      document.getElementById('requestPermission').addEventListener('click', () => {
+        socket.emit('enableNotifications', { userId: '12345' }); // Replace '12345' with dynamic user ID
+      });
+  </script>
+</body>
+</html>

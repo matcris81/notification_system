@@ -7,12 +7,13 @@ import { Logger } from '@nestjs/common'
 @Injectable()
 export class QrCodeService {
   private readonly logger = new Logger(QrCodeService.name); // Ensure logger is properly initialized
+  // url = 'https://192.168.1.100/'
+  url = 'http://192.168.3.48:3000/status/'
 
-  // async generateQRCode(createQrCodeDto: CreateQrCodeDto) {
   async generateQRCode(data: string) {
-    Logger.log('QR Code being made')
+    this.logger.debug('QR Code being made')
     try {
-      const qrCodeDataURL = await qrcode.toDataURL(data);
+      const qrCodeDataURL = await qrcode.toDataURL(this.url + data);
       return qrCodeDataURL;
     } catch (error) {
       throw new Error('Failed to generate QR code. ' + error);
